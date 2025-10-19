@@ -1,0 +1,122 @@
+version: '3'
+
+vars:
+  BINARY_NAME: rag
+  BUILD_DIR: .
+  DATA_DIR: data
+  TEST_FILE: '{{.DATA_DIR}}/chronicles-of-aethelgard.md'
+  EMBEDDINGS_FILE: '{{.DATA_DIR}}/chronicles-of-aethelgard.embeddings.json'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the RAG CLI application
+    cmds:
+      - go build -o {{.BINARY_NAME}} .
+    sources:
+      - '**/*.go'
+    generates:
+      - '{{.BINARY_NAME}}'
+
+  clean:
+    desc: Remove built binary
+    cmds:
+      - rm -f {{.BINARY_NAME}}
+
+  install:
+    desc: Install the binary to $GOPATH/bin
+    deps: [build]
+    cmds:
+      - go install .
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v ./...
+
+  test-coverage:
+    desc: Run tests with coverage
+    cmds:
+      - go test -v -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report generated at coverage.html"
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run || echo "golangci-lint not installed. Install with > brew install golangci-lint"
+
+  fmt:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+      - gofmt -s -w .
+
+  tidy:
+    desc: Tidy dependencies
+    cmds:
+      - go mod tidy
+
+  generate:
+    desc: Generate embeddings from test markdown file
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} generate -i {{.TEST_FILE}}
+
+  search:
+    desc: Search embeddings (usage > task search QUERY="your query")
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} search -i {{.EMBEDDINGS_FILE}} -q "{{.QUERY}}" -k {{.K | default "5"}}
+    vars:
+      QUERY: '{{.QUERY | default "What is the story about?"}}'
+
+  ask:
+    desc: Ask question using RAG (usage > task ask QUERY="your question")
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} ask -i {{.EMBEDDINGS_FILE}} -q "{{.QUERY}}" -k {{.K | default "5"}}
+    vars:
+      QUERY: '{{.QUERY | default "Who are the main characters?"}}'
+
+  update-deps:
+    desc: Update all dependencies
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  help:
+    desc: Show help for the RAG CLI
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} --help
+
+  help-generate:
+    desc: Show help for generate command
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} generate --help
+
+  help-search:
+    desc: Show help for search command
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} search --help
+
+  help-ask:
+    desc: Show help for ask command
+    deps: [build]
+    cmds:
+      - ./{{.BINARY_NAME}} ask --help
+
+  all:
+    desc: Format, tidy, test, and build
+    cmds:
+      - task: fmt
+      - task: tidy
+      - task: test
+      - task: build
