@@ -39,11 +39,11 @@ task build
 # Or: task generate
 
 # 2. Search for similar content 
-./rag search -i data/chronicles-of-aethelgard.md.embeddings.json -q "Which are the monstrous races?" -k 3
+./rag search -i data/chronicles-of-aethelgard.embeddings.json -q "Which are the monstrous races?" -k 3
 # Or: task search QUERY="Which are the monstrous races?"
 
 # 3. Ask questions with RAG
-./rag ask -i data/chronicles-of-aethelgard.md.embeddings.json -q "Explain the biological compatibility of Human species"
+./rag ask -i data/chronicles-of-aethelgard.embeddings.json -q "Explain the biological compatibility of Human species"
 # Or: task ask QUERY="Explain the biological compatibility of Human species"
 ```
 
@@ -63,8 +63,16 @@ Generate embeddings with automatic binary quantization:
 
 **Note**: Binary quantization is always enabled for optimal memory usage.
 
+#### Example
+
+```bash
+# Pick a different model and set dimensions, don't go too low
+./rag generate --model qwen3-embedding:4b --dimensions 2560 -i data/chronicles-of-aethelgard.md
+```
+
 ### Search
 Find and print top K similar chunks with beautiful markdown rendering:
+
 ```bash
 ./rag search -i <embeddings.json> -q "query" [options]
 # Or: task search QUERY="your query" K=5
@@ -73,12 +81,21 @@ Find and print top K similar chunks with beautiful markdown rendering:
 
 ### Ask
 Ask questions using RAG to an LLM model (streaming disabled in favor of Markdown rendering with Glamour):
+
 ```bash
 ./rag ask -i <embeddings.json> -q "question" [options]
 # Or: task ask QUERY="your question" K=5
 ```
+
 - `--model` | `-m`: Chat model (default: `qwen3`)
 - `-k`: Number of context chunks (default: `5`)
+
+#### Example
+
+```bash
+# You can pick a larger model to answer the questions
+./rag ask --model qwen3:8b -i data/chronicles-of-aethelgard.embeddings.json -q "Explain the biological compatibility of Human species"
+```
 
 ## Using Taskfile
 
