@@ -8,6 +8,8 @@ https://k33g.hashnode.dev/rag-from-scratch-with-go-and-ollama
 
 Binary quantization is extremely fast (~60x faster than DotProduct on normalized vectors and ~120x faster than CosineSimilarity) and requires no previous normalization as is unnafected by magnitude. Uses a lot less memory (32x less storage and RAM), but loses accuracy in the process, which can be compensated by using large dimensionality vectors to maintain semantic accuracy (`qwen3-embedding` at 4096 dimensions).
 
+See https://github.com/phrozen/hybrid-agentic-rag for a complete agentic hybrid pipeline example.
+
 ## Features
 
 - 🚀 Generate embeddings from markdown files with text splitting
